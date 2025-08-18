@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 CybeBase CTF - Beginner Hacker Training</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400&display=swap');
+        
+        :root {
+            --primary-green: #00ff41;
+            --secondary-green: #00cc33;
+            --neon-blue: #00d4ff;
+            --neon-purple: #b400ff;
+            --danger-red: #ff0040;
+            --warning-orange: #ff6600;
+            --bg-dark: #0a0a0a;
+            --bg-darker: #000000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000000 100%);
+            color: var(--primary-green);
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Matrix background */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.1;
+        }
+
+        .scan-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(transparent 50%, rgba(0, 255, 65, 0.02) 50%);
+            background-size: 100% 4px;
+            z-index: -1;
+            animation: scan 0.1s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+
+        /* Terminal header */
+        .terminal-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-darker);
+            color: var(--primary-green);
+            padding: 8px 20px;
+            font-size: 12px;
+            border-bottom: 2px solid var(--primary-green);
+            z-index: 1000;
+            animation: terminal-flicker 0.1s infinite alternate;
+        }
+
+        @keyframes terminal-flicker {
+            0% { opacity: 1; }
+            100% { opacity: 0.98; }
+        }
+
+        /* Progress tracker */
+        .progress-tracker {
+            position: fixed;
+            top: 40px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid var(--primary-green);
+            border-radius: 10px;
+            padding: 15px;
+            z-index: 999;
+            min-width: 220px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+
+        .progress-title {
+            color: var(--neon-blue);
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            background: var(--bg-darker);
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            border: 1px solid var(--primary-green);
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, var(--primary-green), var(--neon-blue));
+            height: 100%;
+            width: 0%;
+            transition: width 1s ease;
+            box-shadow: 0 0 10px var(--primary-green);
+        }
+
+        .flag-counter {
+            text-align: center;
+            font-size: 14px;
+            color: var(--primary-green);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 80px 20px 20px;
+        }
+
+        /* Header */
+        .mission-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px;
+            background: linear-gradient(135deg, rgba(0, 255, 65, 0.1), rgba(0, 212, 255, 0.1));
+            border: 3px solid var(--primary-green);
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(0, 255, 65, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mission-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(transparent, var(--neon-blue), transparent 30%);
+            animation: rotate-border 6s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes rotate-border {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .mission-header h1 {
+            font-size: 3.2em;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--primary-green), var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow-pulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow-pulse {
+            from { filter: brightness(1) drop-shadow(0 0 10px var(--primary-green)); }
+            to { filter: brightness(1.2) drop-shadow(0 0 20px var(--primary-green)); }
+        }
+
+        .mission-briefing {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid var(--neon-blue);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .briefing-title {
+            color: var(--danger-red);
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Challenge styling */
+        .challenge {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(10, 10, 10, 0.8));
+            border: 2px solid var(--primary-green);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .challenge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+            transition: left 0.8s ease;
+        }
+
+        .challenge:hover::before {
+            left: 100%;
+        }
+
+        .challenge-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .challenge-icon {
+            font-size: 2.2em;
+            padding: 12px;
+            background: rgba(0, 255, 65, 0.1);
+            border: 2px solid var(--primary-green);
+            border-radius: 12px;
+            animation: icon-pulse 2s infinite;
+        }
+
+        @keyframes icon-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .challenge-title {
+            color: var(--neon-blue);
+            font-size: 1.6em;
+            margin: 0;
+            flex: 1;
+        }
+
+        .challenge-number {
+            background: var(--warning-orange);
+            color: black;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .challenge-description {
+            color: #cccccc;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .learning-objective {
+            background: rgba(180, 0, 255, 0.1);
+            border-left: 4px solid var(--neon-purple);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .learning-title {
+            color: var(--neon-purple);
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .guide-section {
+            background: rgba(0, 212, 255, 0.05);
+            border: 2px solid var(--neon-blue);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .guide-title {
+            color: var(--neon-blue);
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1em;
+        }
+
+        .step-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .step-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #cccccc;
+            font-size: 1em;
+            line-height: 1.5;
+        }
+
+        .step-list li::before {
+            content: "▶";
+            position: absolute;
+            left: 0;
+            color: var(--primary-green);
+            font-size: 1.2em;
+        }
+
+        .highlight {
+            background: var(--warning-orange);
+            color: black;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .terminal {
+            background: var(--bg-darker);
+            color: var(--primary-green);
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            margin: 20px 0;
+            border: 2px solid var(--primary-green);
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .terminal::before {
+            content: "root@cybebase:~$ ";
+            color: var(--danger-red);
+            font-weight: bold;
+        }
+
+        .interactive-element {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid var(--primary-green);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, var(--primary-green), var(--secondary-green));
+            border: none;
+            border-radius: 8px;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            font-size: 1em;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 255, 65, 0.4);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        /* Form elements */
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .login-form input {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid var(--primary-green);
+            border-radius: 8px;
+            color: var(--primary-green);
+            font-family: inherit;
+            font-size: 16px;
+        }
+
+        .login-form input::placeholder {
+            color: rgba(0, 255, 65, 0.6);
+        }
+
+        .login-form input:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .encoded-text {
+            background: var(--bg-darker);
+            padding: 15px;
+            border-radius: 8px;
+            color: var(--warning-orange);
+            font-family: monospace;
+            word-break: break-all;
+            margin: 15px 0;
+            border: 2px solid var(--warning-orange);
+            font-size: 1.1em;
+        }
+
+        .ascii-art {
+            font-family: monospace;
+            white-space: pre;
+            color: var(--primary-green);
+            font-size: 10px;
+            text-align: center;
+            margin: 20px 0;
+            text-shadow: 0 0 8px var(--primary-green);
+        }
+
+        .success-flash {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 3px solid var(--primary-green);
+            border-radius: 15px;
+            padding: 30px;
+            z-index: 10000;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(0, 255, 65, 0.8);
+            display: none;
+            animation: successPop 0.6s ease;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        @keyframes successPop {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .flag-display {
+            background: rgba(255, 0, 64, 0.1);
+            border: 2px solid var(--danger-red);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .flag-display .flag-text {
+            color: var(--danger-red);
+            font-weight: bold;
+            font-size: 1.2em;
+            text-shadow: 0 0 10px var(--danger-red);
+        }
+
+        /* Hidden elements for challenges */
+        .secret-comment {
+            /* 
+            🚩 FLAG 1: CybeBase{html_source_code_reveals_all_secrets}
+            
+            LEARNING: HTML comments are visible to anyone who views the page source.
+            Never put sensitive information in comments - they're not hidden from users!
+            This is one of the first things hackers check when investigating a website.
+            */
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mission-header h1 { font-size: 2.5em; }
+            .progress-tracker {
+                position: static;
+                margin: 20px auto;
+                max-width: 300px;
+            }
+            .challenge-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .container {
+                padding: 100px 15px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Terminal Header -->
+    <div class="terminal-header">
+        <span id="terminal-status">CYBEBASE SYSTEM ONLINE | MISSION: BEGINNER HACKER TRAINING | STATUS: ACTIVE | CLEARANCE: TRAINEE</span>
+    </div>
+
+    <!-- Matrix Background -->
+    <canvas class="matrix-bg" id="matrix"></canvas>
+    <div class="scan-lines"></div>
+
+    <!-- Progress Tracker -->
+    <div class="progress-tracker">
+        <div class="progress-title">🎯 HACKING PROGRESS</div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="flag-counter">
+            <span id="flags-found">0</span> / 3 FLAGS CAPTURED
+        </div>
+    </div>
+
+    <!-- Success Flash -->
+    <div class="success-flash" id="success-flash">
+        <div class="ascii-art">
+    ╔══════════════════════════════════════╗
+    ║           🎉 FLAG CAPTURED! 🎉        ║
+    ║      ████ EXCELLENT WORK! ████       ║
+    ╚══════════════════════════════════════╝
+        </div>
+        <div id="success-message"></div>
+        <button class="btn" onclick="closeSuccess()">CONTINUE HACKING</button>
+    </div>
+
+    <div class="container">
+        <!-- Mission Header -->
+        <div class="mission-header">
+            <h1>🔥 CYBEBASE: HACKER TRAINING 🔥</h1>
+            <p style="font-size: 1.2em; color: var(--neon-blue); margin-top: 15px;">
+                Welcome, Future Hacker. Your training begins now.<br>
+                Master 3 essential hacking techniques and capture the hidden flags!
+            </p>
+        </div>
+
+        <!-- Mission Briefing -->
+        <div class="mission-briefing">
+            <div class="briefing-title">🚨 HACKER TRAINING PROTOCOL</div>
+            <p>Welcome to CybeBase, the ultimate hacker training facility. You are about to learn 3 fundamental hacking techniques that every cybersecurity professional must master. Each challenge contains a hidden flag in the format: <strong style="color: var(--danger-red);">CybeBase{...}</strong></p>
+            <p style="margin-top: 15px;">Complete all challenges to earn your <strong style="color: var(--primary-green);">Elite Hacker</strong> certification. Remember: with great power comes great responsibility. Use your skills to protect, not harm.</p>
+        </div>
+
+        <div class="ascii-art">
+    ██████╗██╗   ██╗██████╗ ███████╗██████╗  █████╗ ███████╗███████╗
+    ██╔════╝╚██╗ ██╔╝██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔════╝██╔════╝
+    ██║      ╚████╔╝ ██████╔╝█████╗  ██████╔╝███████║███████╗█████╗  
+    ██║       ╚██╔╝  ██╔══██╗██╔══╝  ██╔══██╗██╔══██║╚════██║██╔══╝  
+    ╚██████╗   ██║   ██████╔╝███████╗██████╔╝██║  ██║███████║███████╗
+     ╚═════╝   ╚═╝   ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝
+        </div>
+
+        <!-- Challenge 1: HTML Comments -->
+        <div class="challenge">
+            <div class="challenge-header">
+                <div class="challenge-icon">🔍</div>
+                <h3 class="challenge-title">Source Code Infiltration</h3>
+                <div class="challenge-number">Challenge 1/3</div>
+            </div>
+
+            <div class="challenge-description">
+                Every hacker's first lesson: the source code reveals all. Developers often hide secrets in HTML comments, thinking users won't find them. They're wrong.
+            </div>
+
+            <div class="learning-objective">
+                <div class="learning-title">🎓 Hacking Technique:</div>
+                Learn to inspect HTML source code and discover hidden information that developers never intended you to see.
+            </div>
+
+            <div class="guide-section">
+                <div class="guide-title">📋 Step-by-Step Hack:</div>
+                <ul class="step-list">
+                    <li>Right-click anywhere on this webpage</li>
+                    <li>Select <span class="highlight">"View Page Source"</span> from the menu</li>
+                    <li>Alternative: Use keyboard shortcut <span class="highlight">Ctrl+U</span> (Windows) or <span class="highlight">Cmd+U</span> (Mac)</li>
+                    <li>Search for <span class="highlight">"FLAG"</span> using Ctrl+F</li>
+                    <li>Look for HTML comments that start with <code>&lt;!--</code></li>
+                    <li>Extract the hidden flag from the comment</li>
+                </ul>
+            </div>
+
+            <div class="terminal">
+                view-source:cybebase.html | grep -i "flag"
+            </div>
+
+            <div class="interactive-element">
+                <p style="color: var(--neon-blue); margin-bottom: 15px;">🎯 <strong>YOUR MISSION:</strong> Infiltrate the source code and extract the hidden flag!</p>
+                <button class="btn" onclick="revealFlag1()">I FOUND THE FLAG!</button>
+            </div>
+        </div>
+
+        <!-- Challenge 2: Hardcoded Credentials -->
+        <div class="challenge">
+            <div class="challenge-header">
+                <div class="challenge-icon">🔑</div>
+                <h3 class="challenge-title">Password Exploitation</h3>
+                <div class="challenge-number">Challenge 2/3</div>
+            </div>
+
+            <div class="challenge-description">
+                Weak passwords are a hacker's best friend. Many systems use predictable, common passwords that can be cracked instantly. Time to exploit this vulnerability.
+            </div>
+
+            <div class="learning-objective">
+                <div class="learning-title">🎓 Hacking Technique:</div>
+                Master the art of password cracking using common password lists and social engineering principles.
+            </div>
+
+            <div class="guide-section">
+                <div class="guide-title">📋 Password Attack Strategy:</div>
+                <ul class="step-list">
+                    <li>The username is <span class="highlight">"admin"</span> - most systems use this default</li>
+                    <li>Try the most common weak passwords first</li>
+                    <li>Start with <span class="highlight">"password"</span> - used by millions of people</li>
+                    <li>If that fails, try <span class="highlight">"123456"</span> or <span class="highlight">"admin"</span></li>
+                    <li>Real hackers use automated tools that try thousands of passwords per second</li>
+                </ul>
+            </div>
+
+            <div class="interactive-element">
+                <p style="color: var(--neon-blue); margin-bottom: 15px;">🔐 <strong>TARGET SYSTEM:</strong> Crack the login credentials!</p>
+                <div class="login-form">
+                    <input type="text" value="admin" readonly style="background: rgba(255,255,255,0.05); cursor: not-allowed;" />
+                    <input type="password" id="password" placeholder="🔐 Enter Password" />
+                    <button class="btn" onclick="attemptHack()">EXECUTE HACK</button>
+                </div>
+            </div>
+
+            <div class="terminal">
+                hydra -l admin -P common_passwords.txt target_system.com http-post-form
+            </div>
+        </div>
+
+        <!-- Challenge 3: Base64 Decoding -->
+        <div class="challenge">
+            <div class="challenge-header">
+                <div class="challenge-icon">🔤</div>
+                <h3 class="challenge-title">Encrypted Message Decryption</h3>
+                <div class="challenge-number">Challenge 3/3</div>
+            </div>
+
+            <div class="challenge-description">
+                Cybercriminals often encode their messages to hide them from law enforcement. This intercepted message is encoded in Base64 - a common encoding scheme that every hacker must know how to decode.
+            </div>
+
+            <div class="learning-objective">
+                <div class="learning-title">🎓 Hacking Technique:</div>
+                Learn to decode Base64 messages and understand the difference between encoding and encryption.
+            </div>
+
+            <div class="interactive-element">
+                <p style="color: var(--neon-blue); margin-bottom: 15px;">📡 <strong>INTERCEPTED TRANSMISSION:</strong></p>
+                <div class="encoded-text">Q3liZUJhc2V7YmFzZTY0X2RlY29kaW5nX21hc3RlcmVkfQ==</div>
+            </div>
+
+            <div class="guide-section">
+                <div class="guide-title">📋 Decryption Protocol:</div>
+                <ul class="step-list">
+                    <li>Copy the encoded message above</li>
+                    <li>Open a new browser tab</li>
+                    <li>Search Google for <span class="highlight">"base64 decoder"</span></li>
+                    <li>Click on any online Base64 decoder tool</li>
+                    <li>Paste the encoded message and click "Decode"</li>
+                    <li>The secret flag will be revealed!</li>
+                </ul>
+            </div>
+
+            <div class="terminal">
+                echo "Q3liZUJhc2V7YmFzZTY0X2RlY29kaW5nX21hc3RlcmVkfQ==" | base64 -d
+            </div>
+
+            <div class="interactive-element">
+                <button class="btn" onclick="revealFlag3()">I DECODED THE MESSAGE!</button>
+            </div>
+        </div>
+
+        <!-- Mission Summary -->
+        <div class="mission-briefing" style="margin-top: 50px;">
+            <div class="briefing-title">🎯 ELITE HACKER CERTIFICATION</div>
+            <p>Congratulations! You have mastered the essential hacking techniques:</p>
+            <ul style="margin: 15px 0; padding-left: 20px; color: #cccccc;">
+                <li><strong>Source Code Infiltration</strong> - You can now discover hidden information in any website</li>
+                <li><strong>Password Exploitation</strong> - You understand how weak passwords can be cracked instantly</li>
+                <li><strong>Message Decryption</strong> - You can decode Base64 encoded communications</li>
+            </ul>
+            <p style="margin-top: 20px; color: var(--warning-orange);"><strong>Remember the Hacker's Code:</strong> Use your powers only for good. Protect systems, don't exploit them maliciously. Report vulnerabilities responsibly.</p>
+        </div>
+
+        <div class="ascii-art" style="margin-top: 40px;">
+    ╔══════════════════════════════════════════════════════════════╗
+    ║  🎉 CONGRATULATIONS, ELITE HACKER! 🎉                        ║
+    ║                                                              ║
+    ║  You have successfully completed CybeBase Training and       ║
+    ║  earned your Elite Hacker certification!                    ║
+    ║                                                              ║
+    ║  🛡️ USE YOUR SKILLS TO PROTECT THE DIGITAL WORLD! 🛡️        ║
+    ╚══════════════════════════════════════════════════════════════╝
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let flagsFound = 0;
+        let foundFlags = new Set();
+
+        // Matrix background animation
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const fontSize = 14;
+        const columns = canvas.width/fontSize;
+        const rainDrops = [];
+
+        for( let x = 0; x < columns; x++ ) {
+            rainDrops[x] = 1;
+        }
+
+        const draw = () => {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#00ff41';
+            ctx.font = fontSize + 'px monospace';
+
+            for(let i = 0; i < rainDrops.length; i++) {
+                const text = katakana.charAt(Math.floor(Math.random() * katakana.length));
+                ctx.fillText(text, i*fontSize, rainDrops[i]*fontSize);
+                
+                if(rainDrops[i]*fontSize > canvas.height && Math.random() > 0.975) {
+                    rainDrops[i] = 0;
+                }
+                rainDrops[i]++;
+            }
+        };
+
+        setInterval(draw, 50);
+
+        // Terminal status updates
+        const terminalMessages = [
+            "CYBEBASE SYSTEM ONLINE | MISSION: BEGINNER HACKER TRAINING | STATUS: ACTIVE | CLEARANCE: TRAINEE",
+            "SCANNING TARGET SYSTEMS | VULNERABILITIES DETECTED: 3 | EXPLOITATION STATUS: IN PROGRESS",
+            "NETWORK INFILTRATION ACTIVE | ENCRYPTION: BYPASSED | FIREWALL STATUS: PENETRATED",
+            "TRAINING PROGRESS: ONGOING | HACKER STATUS: TRAINEE | SECURITY LEVEL: LEARNING MODE"
+        ];
+
+        let messageIndex = 0;
+        setInterval(() => {
+            document.getElementById('terminal-status').textContent = terminalMessages[messageIndex];
+            messageIndex = (messageIndex + 1) % terminalMessages.length;
+        }, 4000);
+
+        // Sound effects
+        function playSuccessSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (e) {
+                // Audio context not supported, continue silently
+            }
+        }
+
+        function playClickSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 1000;
+                oscillator.type = 'square';
+                
+                gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.05);
+            } catch (e) {
+                // Audio context not supported, continue silently
+            }
+        }
+
+        // Progress tracking
+        function updateProgress() {
+            const progressPercentage = (flagsFound / 3) * 100;
+            document.getElementById('progress-fill').style.width = progressPercentage + '%';
+            document.getElementById('flags-found').textContent = flagsFound;
+        }
+
+        function showSuccess(message, flag) {
+            document.getElementById('success-message').innerHTML = 
+                `<p style="color: var(--neon-blue); margin-bottom: 15px; font-size: 1.1em;">${message}</p>
+                <div class="flag-display">
+                    <div class="flag-text">${flag}</div>
+                </div>`;
+            document.getElementById('success-flash').style.display = 'block';
+            playSuccessSound();
+            
+            // Add glitch effect to body
+            document.body.style.animation = 'glitch 0.3s';
+            setTimeout(() => { document.body.style.animation = ''; }, 300);
+        }
+
+        function closeSuccess() {
+            document.getElementById('success-flash').style.display = 'none';
+        }
+
+        function captureFlag(flagNumber) {
+            if (!foundFlags.has(flagNumber)) {
+                foundFlags.add(flagNumber);
+                flagsFound++;
+                updateProgress();
+                
+                // Check if training complete
+                if (flagsFound === 3) {
+                    setTimeout(() => {
+                        alert('🎉 ELITE HACKER CERTIFICATION ACHIEVED! 🎉\n\nCongratulations! You have successfully completed CybeBase Training!\n\nFlags Captured: 3/3\nRank: ELITE HACKER\nCertification: GRANTED\n\nYou are now ready for advanced cybersecurity missions!');
+                    }, 1500);
+                }
+            }
+        }
+
+        // Challenge Functions
+
+        // Challenge 1: HTML Comments
+        function revealFlag1() {
+            showSuccess(
+                '🎯 FLAG 1 CAPTURED! Source code infiltration successful!',
+                'CybeBase{html_source_code_reveals_all_secrets}'
+            );
+            captureFlag(1);
+        }
+
+        // Challenge 2: Password Cracking  
+        function attemptHack() {
+            const password = document.getElementById('password').value.trim();
+            
+            if (password === 'password') {
+                showSuccess(
+                    '🎯 FLAG 2 CAPTURED! Password exploitation successful!',
+                    'CybeBase{weak_passwords_are_hackers_best_friend}'
+                );
+                captureFlag(2);
+            } else if (password === '123456' || password === 'admin' || password === 'letmein') {
+                alert('❌ ACCESS DENIED!\n\nThat\'s a common password, but not the one used here.\n\nHint: Try the most obvious password that millions of people actually use: "password"');
+            } else {
+                alert('❌ HACK FAILED!\n\nIncorrect password. Try common weak passwords.\n\nHint: What\'s the most common terrible password that people use?');
+            }
+            playClickSound();
+        }
+
+        // Challenge 3: Base64 Decoding
+        function revealFlag3() {
+            showSuccess(
+                '🎯 FLAG 3 CAPTURED! Message decryption successful!',
+                'CybeBase{base64_decoding_mastered}'
+            );
+            captureFlag(3);
+        }
+
+        // Initialize welcome messages
+        console.log('%c🚀 CYBEBASE HACKER TRAINING ACTIVE 🚀', 'color: #00ff41; font-size: 24px; font-weight: bold; text-shadow: 2px 2px 4px #000;');
+        console.log('%c⚡ Welcome to Elite Hacker Training Program ⚡', 'color: #0080ff; font-size: 18px; font-weight: bold;');
+        console.log('%c🕵️ You\'re already thinking like a hacker - checking the console! 🕵️', 'color: #ff6600; font-size: 14px;');
+        console.log('%c🎯 Your mission: Master 3 essential hacking techniques.', 'color: #ffff00; font-size: 14px;');
+        console.log('%c🔍 Flag format: CybeBase{...}', 'color: #ff0040; font-size: 14px; font-weight: bold;');
+        console.log('%c💡 Remember: Use your powers for good, not evil!', 'color: #b400ff; font-size: 14px;');
+
+        // Window resize handler for matrix animation
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Add click sounds to all buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.btn').forEach(button => {
+                button.addEventListener('click', playClickSound);
+            });
+        });
+
+        // Initialize progress
+        updateProgress();
+
+        // CSS for glitch animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes glitch {
+                0% { transform: translate(0); }
+                20% { transform: translate(-2px, 2px); }
+                40% { transform: translate(-2px, -2px); }
+                60% { transform: translate(2px, 2px); }
+                80% { transform: translate(2px, -2px); }
+                100% { transform: translate(0); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
