@@ -1,4 +1,4 @@
-# CyberBase – Pre-CTF Tutorial 🇧🇭
+# CyberBase – Pre-CTF Tutorial 
 
 This repository contains the **tutorial materials** created for the students of **CyberBase YouthCity2030, Bahrain** as an introduction to cybersecurity concepts **before** starting the Capture The Flag (CTF) challenges.
 
